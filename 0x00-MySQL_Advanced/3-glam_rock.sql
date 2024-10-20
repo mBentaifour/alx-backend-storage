@@ -1,8 +1,7 @@
 -- Old school band
 -- script that lists all bands with Glam rock
-
-SELECT band_name,
-       IFNULL(YEAR(split), 2022) - YEAR(formed) AS lifespan
+--  Calculate the lifespan of glam rock bands.
+SELECT band_name AS band_name, IFNULL(split, 2022) - IFNULL(formed, 0) AS lifespan
 FROM metal_bands
-WHERE main_style = 'Glam rock'
+WHERE style LIKE '%Glam rock%'
 ORDER BY lifespan DESC;
