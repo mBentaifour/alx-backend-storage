@@ -1,0 +1,6 @@
+// All documents that lists all documents in the collection school
+// Connect to MongoDB and list all documents in the school collection
+mongo "$1" <<EOF
+db.school.find()
+exit
+EOF

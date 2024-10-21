@@ -1,0 +1,6 @@
+// a script that inserts a document in the collection school
+// Connect to MongoDB and insert a document
+mongo "$1" <<EOF
+db.school.insert({ name: "Holberton school" })
+exit
+EOF
