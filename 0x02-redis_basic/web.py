@@ -1,33 +1,43 @@
 #!/usr/bin/env python3
+
 """web redis"""
 """Implementing an expiring web cache and tracker"""
 
-import requests
 import redis
-import typing
+import requests
 from functools import wraps
 
+r = redis.Redis()
 
-red = redis.Redis()
 
-
-def cache_page(method: typing.Callable) -> typing.Callable:
-    """used to cache th apge"""
+def url_access_count(method):
+    """decorator for get_page function"""
     @wraps(method)
-    def wrapper(*args, **kwargs):
-        page = red.get(args[0])
-        if page is not None:
-            return page.decode('utf-8')
-        else:
-            page = method(*args)
-            red.set(args[0], page, ex=10)
-            return page
+    def wrapper(url):
+        """wrapper function"""
+        key = "cached:" + url
+        cached_value = r.get(key)
+        if cached_value:
+            return cached_value.decode("utf-8")
+
+            # Get new content and update cache
+        key_count = "count:" + url
+        html_content = method(url)
+
+        r.incr(key_count)
+        r.set(key, html_content, ex=10)
+        r.expire(key, 10)
+        return html_content
     return wrapper
 
 
-@cache_page
+@url_access_count
 def get_page(url: str) -> str:
-    """the function that gets the page"""
-    res = requests.get(url).text
-    red.incr(f'count:{url}')
-    return res
+    """obtain the HTML content of a particular"""
+    results = requests.get(url)
+    return results.text
+
+
+if __name__ == "__main__":
+    get_page('http://slowwly.robertomurray.co.uk')
+
